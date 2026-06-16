@@ -38,7 +38,7 @@
 # MAGIC ```
 # MAGIC ┌──────────────────────┐        ┌──────────────────────┐
 # MAGIC │  Databricks App      │        │  Lakebase Project     │
-# MAGIC │  "datacart-storefront"│       │  production branch    │
+# MAGIC │  "storefront-<id>"   │        │  production branch    │
 # MAGIC │                      │        │                       │
 # MAGIC │  Runs as SP:         │  OAuth │  Postgres role:       │
 # MAGIC │  8241cbc7-...        │───────▶│  "8241cbc7-..."       │
@@ -80,14 +80,12 @@ from databricks.sdk import WorkspaceClient
 
 w = WorkspaceClient()
 
-# Derive project name from current user
-current_user = w.current_user.me()
-db_user = current_user.user_name
-username_prefix = db_user.split("@")[0].replace(".", "-")
-project_name = f"lakebase-branching-workshop-{username_prefix}"
+# Bundle-deployed Lakebase project (datacart-storefront/databricks.yml)
+project_name = f"lakebase-workshop-{w.current_user.me().id}"
+db_user = w.current_user.me().user_name
 
 # Look up the app to find its service principal
-APP_NAME = "datacart-storefront"
+APP_NAME = f"storefront-{w.current_user.me().id}"
 
 app_info = w.apps.get(APP_NAME)
 SP_CLIENT_ID = app_info.service_principal_client_id
@@ -217,7 +215,7 @@ else:
 # MAGIC | `ALTER DEFAULT PRIVILEGES` | Ensures future tables (reviews, loyalty_members, promotions) are automatically accessible |
 # MAGIC
 # MAGIC > The `ALTER DEFAULT PRIVILEGES` grants are important — as the workshop progresses
-# MAGIC > and new tables are created (reviews in Lab 3.3, promotions in Lab 5.1), the SP
+# MAGIC > and new tables are created (promotions in Lab 3.1, reviews in Lab 6.2), the SP
 # MAGIC > will automatically have access without needing to re-run this notebook.
 
 # COMMAND ----------
@@ -446,10 +444,11 @@ conn.close()
 # MAGIC The DataCart Storefront is now connected and ready. As you run through the remaining
 # MAGIC labs, the storefront will **evolve automatically**:
 # MAGIC
-# MAGIC - **Lab 3.3** — Star ratings, loyalty badges, and "Earn pts" labels appear
-# MAGIC - **Lab 3.4** — Priority badges on orders, verified badge in navbar
-# MAGIC - **Lab 4.1** — Orders page breaks during the disaster, then recovers after PITR
-# MAGIC - **Lab 5.1** — Sale badges and discount prices appear via reverse ETL
+# MAGIC - **Lab 3.1** — Sale badges and discount prices appear via Reverse ETL
+# MAGIC - **Labs 4.1 / 5.1** — UC foreign catalog and Lakehouse Sync go live (no storefront change; analytics surface lights up)
+# MAGIC - **Lab 6.2** — Star ratings, loyalty badges, and "Earn pts" labels appear
+# MAGIC - **Lab 6.3** — Priority badges on orders, verified badge in navbar
+# MAGIC - **Lab 7.1** — Orders page breaks during the PITR disaster, then recovers
 # MAGIC
 # MAGIC > The `ALTER DEFAULT PRIVILEGES` grants ensure the SP can access new tables
 # MAGIC > created in later labs without needing to re-run this notebook.

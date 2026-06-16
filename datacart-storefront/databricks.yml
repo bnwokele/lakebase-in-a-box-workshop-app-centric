@@ -1,25 +1,12 @@
 bundle:
-  name: datacart-storefront
+  name: datacart-storefront-data-centric
 
 include:
   - resources/*.yml
-
-variables:
-  lakebase_project:
-    description: "Lakebase project name (e.g., lakebase-branching-workshop-<username>)"
-  endpoint_name:
-    description: "Full Lakebase endpoint path (e.g., projects/<project>/branches/production/endpoints/primary)"
-  db_schema:
-    default: "ecommerce"
 
 targets:
   dev:
     default: true
     mode: development
     workspace:
-      profile: fe-vm-ben
-
-  workshop:
-    mode: production
-    workspace:
-      profile: fe-vm-ben
+      root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/${bundle.target}
