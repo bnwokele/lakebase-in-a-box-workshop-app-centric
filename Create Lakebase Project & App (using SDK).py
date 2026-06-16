@@ -1,6 +1,6 @@
 # Databricks notebook source
 # MAGIC %md
-# MAGIC # Optional: Create the Lakebase Project and Storefront App via SDK (No DABs)
+# MAGIC # Create the Lakebase Project and Storefront App via SDK (No DABs)
 # MAGIC
 # MAGIC ---
 # MAGIC
@@ -267,4 +267,3 @@ print(f"🔗 App in workspace UI: {workspace_host}/apps/{app_name}")
 # print(f"🗑️  Deleted app {app_name}")
 # w.postgres.delete_project(name=f"projects/{project_name}").wait()
 # print(f"🗑️  Deleted project {project_name}")
-
