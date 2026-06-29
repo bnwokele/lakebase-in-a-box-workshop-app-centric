@@ -92,7 +92,7 @@ project_name = f"lakebase-workshop-{w.current_user.me().id}"
 # Where the synced Lakebase tables will land — a catalog is provisioned per user, named after their
 # username (the local part of their email, e.g. "labuser15249143_1781106810@vocareum.com"
 # -> "labuser15249143_1781106810").
-UC_CATALOG = w.current_user.me().user_name.split("@")[0]
+UC_CATALOG = "ADD YOUR CATALOG"
 UC_SCHEMA = "lakebase_to_lakehouse"
 TABLES_TO_SYNC = ["orders", "customers", "order_items"]
 

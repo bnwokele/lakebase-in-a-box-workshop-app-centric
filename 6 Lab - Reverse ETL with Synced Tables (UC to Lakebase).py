@@ -258,7 +258,7 @@ db_user = w.current_user.me().user_name
 # Unity Catalog configuration — a catalog is provisioned per user, named after their
 # username (the local part of their email, e.g. "labuser15249143_1781106810@vocareum.com"
 # -> "labuser15249143_1781106810").
-UC_CATALOG = db_user.split("@")[0]
+UC_CATALOG = "ADD YOU CATALOG"
 UC_SCHEMA = "ecommerce"
 UC_TABLE = f"{UC_CATALOG}.{UC_SCHEMA}.promotions"
 
