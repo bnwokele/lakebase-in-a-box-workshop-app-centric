@@ -24,7 +24,7 @@
 # MAGIC | **4** | Schema Changes: Feature Branch to Production | Promoted validated changes from a feature branch to production using idempotent Migration Replay |
 # MAGIC | **5** | Point-in-Time Recovery (PITR) & Snapshots | Simulated a "Code Red" dropped-table disaster and recovered production with zero data loss |
 # MAGIC | **6** | Reverse ETL with Synced Tables (UC → Lakebase) | Pushed Spring Sale promotions from a Delta table into Lakebase so the storefront shows sale badges and discounts |
-# MAGIC | **7** | Lakehouse Sync (Lakebase → UC) | Continuously mirrored live OLTP tables to Delta in Unity Catalog for heavy analytics — without loading production |
+# MAGIC | **7** | Lakebase CDF (Lakebase → UC) | Continuously mirrored live OLTP tables to Delta in Unity Catalog for heavy analytics — without loading production |
 # MAGIC
 # MAGIC > A companion setup notebook — **Create Lakebase Project & App (using SDK)** — provisions the Lakebase project and the DataCart storefront app if you need to (re)create them via the SDK instead of the bundle deploy path.
 
@@ -121,17 +121,17 @@
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## Lab 7 — Lakehouse Sync (Lakebase → UC)
+# MAGIC ## Lab 7 — Lakebase CDF (Lakebase → UC)
 # MAGIC
-# MAGIC **Objective:** Set up Lakehouse Sync to continuously mirror live Lakebase OLTP tables into Unity Catalog Delta tables for high-throughput analytics — without loading the production database.
+# MAGIC **Objective:** Set up Lakebase CDF to continuously mirror live Lakebase OLTP tables into Unity Catalog Delta tables for high-throughput analytics — without loading the production database.
 # MAGIC
 # MAGIC **What you did**
 # MAGIC - Set `REPLICA IDENTITY FULL` on source Lakebase tables so logical replication captures UPDATEs and DELETEs
-# MAGIC - Created a Lakehouse Sync configuration targeting a UC catalog/schema
+# MAGIC - Created a Lakebase CDF configuration targeting a UC catalog/schema
 # MAGIC - Triggered the initial snapshot and verified the Delta tables landed in Unity Catalog
 # MAGIC - Ran analytics queries against the Delta replica to demonstrate "OLTP analytics without OLTP load"
 # MAGIC
-# MAGIC **Key concepts:** Lakehouse Sync · CDC / Postgres logical replication · `REPLICA IDENTITY FULL` · OLTP-to-Delta mirroring · schema evolution · Unity Catalog Delta tables
+# MAGIC **Key concepts:** Lakebase CDF · CDC / Postgres logical replication · `REPLICA IDENTITY FULL` · OLTP-to-Delta mirroring · schema evolution · Unity Catalog Delta tables
 
 # COMMAND ----------
 
@@ -143,13 +143,13 @@
 # MAGIC | **Serverless autoscaling & scale-to-zero** | No more overprovisioning for peak traffic — compute scales to demand and to **zero** when idle, so DataCart pays only for what it uses |
 # MAGIC | **Decoupled compute & storage** | The foundation that makes autoscaling and zero-copy branches possible — data lives in cheap object storage in open formats, independent of compute |
 # MAGIC | **Zero-copy branching** | Ended the single shared dev database that drifted from prod and the weekend refreshes — every developer gets an isolated, production-like database in seconds |
-# MAGIC | **No-ETL bidirectional sync** | Retired the brittle hand-built pipelines — Reverse ETL (UC → Lakebase) serves analytics data to the app and Lakehouse Sync (Lakebase → UC) feeds analytics from OLTP, both fully managed |
+# MAGIC | **No-ETL bidirectional sync** | Retired the brittle hand-built pipelines — Reverse ETL (UC → Lakebase) serves analytics data to the app and Lakebase CDF (Lakebase → UC) feeds analytics from OLTP, both fully managed |
 # MAGIC | **Point-in-Time Recovery** | Turned an hours-long, revenue-losing outage into a seconds-long recovery — no nightly-backup hunt |
 # MAGIC | **Unified governance** | Service principals, OAuth roles, and Unity Catalog kept access controlled across branches and the lakehouse |
 # MAGIC
 # MAGIC ### Where to go next
 # MAGIC - Apply the **branch → migrate → diff → replay** pattern to your own schema changes
-# MAGIC - Use **Synced Tables** and **Lakehouse Sync** to connect your operational apps and analytics without bespoke ETL
+# MAGIC - Use **Synced Tables** and **Lakebase CDF** to connect your operational apps and analytics without bespoke ETL
 # MAGIC - Build **scale-to-zero developer sandboxes** and AI-agent environments on branches
 # MAGIC - Make **PITR and Snapshots** part of your operational runbook
 # MAGIC

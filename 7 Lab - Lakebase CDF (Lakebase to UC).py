@@ -1,6 +1,6 @@
 # Databricks notebook source
 # MAGIC %md
-# MAGIC # Lab 7: Lakehouse Sync — Lakebase to Unity Catalog
+# MAGIC # Lab 7: Lakebase CDF — Lakebase to Unity Catalog
 # MAGIC
 # MAGIC ---
 # MAGIC
@@ -12,28 +12,28 @@
 # MAGIC | Direction | Lab | Mechanism | Best for |
 # MAGIC |---|---|---|---|
 # MAGIC | UC → Lakebase | 6 | Synced Tables | Serving Lakehouse data to apps |
-# MAGIC | **Lakebase → UC** | **7 (this lab)** | **Lakehouse Sync** | **High-throughput analytics on OLTP data** |
+# MAGIC | **Lakebase → UC** | **7 (this lab)** | **Lakebase CDF** | **High-throughput analytics on OLTP data** |
 # MAGIC
-# MAGIC In this lab you'll set up Lakehouse Sync so the live `orders`, `customers`, and `order_items`
+# MAGIC In this lab you'll set up Lakebase CDF so the live `orders`, `customers`, and `order_items`
 # MAGIC tables in Lakebase are continuously mirrored as Delta tables in Unity Catalog. Once that's
 # MAGIC running, BI dashboards, ML pipelines, and ad-hoc analytical queries can hit Delta — getting
 # MAGIC full lakehouse performance — without putting any load on the OLTP database that powers the
 # MAGIC storefront.
 # MAGIC
-# MAGIC > **📍 DataCart's journey** — DataCart also hand-built the reverse pipeline that syncs app data back to Databricks for analytics — more custom ETL to run, monitor, and maintain. This lab replaces it with **managed Lakehouse Sync**, completing no-ETL data movement in *both* directions and freeing the team's time for revenue-producing work.
+# MAGIC > **📍 DataCart's journey** — DataCart also hand-built the reverse pipeline that syncs app data back to Databricks for analytics — more custom ETL to run, monitor, and maintain. This lab replaces it with **managed Lakebase CDF**, completing no-ETL data movement in *both* directions and freeing the team's time for revenue-producing work.
 # MAGIC
 # MAGIC ## Learning Objectives
 # MAGIC
 # MAGIC By the end of this lab, you will be able to:
-# MAGIC 1. **Explain** what Lakehouse Sync is and how it complements Synced Tables (Lab 6)
-# MAGIC 2. **Create** a Lakehouse Sync configuration that mirrors Lakebase tables to UC Delta
+# MAGIC 1. **Explain** what Lakebase CDF is and how it complements Synced Tables (Lab 6)
+# MAGIC 2. **Create** a Lakebase CDF configuration that mirrors Lakebase tables to UC Delta
 # MAGIC 3. **Trigger** the initial snapshot and verify Delta tables appear in UC
 # MAGIC 4. **Demonstrate** end-to-end propagation by inserting a row in Lakebase and observing it in Delta
 # MAGIC 5. **Run** an analytics query on the Delta-side data — "OLTP analytics without OLTP load"
 # MAGIC
 # MAGIC **Available as a beta feature on AWS but will be on AZURE soon!**
 # MAGIC
-# MAGIC > **Docs**: [Lakehouse Sync](https://docs.databricks.com/aws/en/oltp/projects/lakehouse-sync)
+# MAGIC > **Docs**: [Lakebase CDF](https://docs.databricks.com/aws/en/oltp/projects/lakehouse-sync)
 
 # COMMAND ----------
 
@@ -48,14 +48,14 @@
 # MAGIC - Run slowly because OLTP storage is row-oriented, not columnar
 # MAGIC - Cost the same as serving live application traffic
 # MAGIC
-# MAGIC **Lakehouse Sync** addresses this by keeping a continuously-updated Delta replica of your
+# MAGIC **Lakebase CDF** addresses this by keeping a continuously-updated Delta replica of your
 # MAGIC OLTP tables in Unity Catalog. Analytics queries hit Delta — columnar storage, photon
 # MAGIC acceleration, and zero contention with the storefront.
 # MAGIC
 # MAGIC ```
 # MAGIC ┌─────────────────────────┐                  ┌─────────────────────────────────┐
 # MAGIC │   Lakebase (production) │                  │      Unity Catalog (Delta)       │
-# MAGIC │  ─────────────────────  │  Lakehouse Sync  │  ──────────────────────────────  │
+# MAGIC │  ─────────────────────  │  Lakebase CDF  │  ──────────────────────────────  │
 # MAGIC │   ecommerce.orders      │ ──────────────▶ │  <your-catalog>.datacart_uc.orders │
 # MAGIC │   ecommerce.customers   │       CDC        │  <your-catalog>.datacart_uc.customers│
 # MAGIC │   ecommerce.order_items │                  │  <your-catalog>.datacart_uc.order_items│
@@ -89,10 +89,10 @@ w = WorkspaceClient()
 # Bundle-deployed Lakebase project
 project_name = f"lakebase-workshop-{w.current_user.me().id}"
 
-# Where the synced Lakebase tables will land — a catalog is provisioned per user, named after their
-# username (the local part of their email, e.g. "labuser15249143_1781106810@vocareum.com"
-# -> "labuser15249143_1781106810").
-UC_CATALOG = "ADD YOUR CATALOG"
+# Where the synced Lakebase tables will land.
+# 👉 EDIT THIS: set UC_CATALOG to a Unity Catalog you can create schemas in
+#    (you need CREATE SCHEMA privileges on it).
+UC_CATALOG = "<your-catalog-here>"
 UC_SCHEMA = "lakebase_to_lakehouse"
 TABLES_TO_SYNC = ["orders", "customers", "order_items"]
 
@@ -116,12 +116,12 @@ print(f"✅ Schema {UC_CATALOG}.{UC_SCHEMA} ready")
 # MAGIC %md
 # MAGIC ## Step 3: Set `REPLICA IDENTITY FULL` on Source Tables
 # MAGIC
-# MAGIC Lakehouse Sync uses Postgres logical replication to capture row-level changes. For
+# MAGIC Lakebase CDF uses Postgres logical replication to capture row-level changes. For
 # MAGIC `UPDATE`s and `DELETE`s to be replicated correctly, each source table needs its
 # MAGIC **replica identity** set to `FULL` — that tells Postgres to log the entire old row in the
 # MAGIC WAL (write-ahead log), not just the primary key.
 # MAGIC
-# MAGIC Without this, Lakehouse Sync **silently skips the table**:
+# MAGIC Without this, Lakebase CDF **silently skips the table**:
 # MAGIC > Tables without REPLICA IDENTITY FULL will be skipped. Run ALTER TABLE ... REPLICA IDENTITY FULL to include them.
 # MAGIC
 # MAGIC We run the `ALTER TABLE` once per table before configuring the sync. It's idempotent — safe
@@ -182,9 +182,9 @@ owner_conn.close()
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## Step 4: Create the Lakehouse Sync Configuration
+# MAGIC ## Step 4: Create the Lakebase CDF Configuration
 # MAGIC
-# MAGIC Lakehouse Sync is configured at the project level. The cleanest way to set it up is via the
+# MAGIC Lakebase CDF is configured at the project level. The cleanest way to set it up is via the
 # MAGIC Databricks UI — that's what we'll walk through here. (You can also do this via the SDK /
 # MAGIC REST API; see the docs link above.)
 # MAGIC
@@ -193,10 +193,10 @@ owner_conn.close()
 # MAGIC 1. Navigate to the **Lakebase Project UI**.
 # MAGIC 2. Navigate to your Lakebase project.
 # MAGIC 3. Click the **production** branch.
-# MAGIC 4. In the branch overview page, click the **Lakehouse CDF** button.
+# MAGIC 4. In the branch overview page, click the **Lakebase CDF** button.
 # MAGIC 5. Click the **Start sync** button on the right side of the screen.
 # MAGIC 6. Fill out the dialog box that pops up:
-# MAGIC    - Sync the tables to the `lakebase_to_lakehouse` schema in your per-user catalog (the `UC_CATALOG` / `UC_SCHEMA` values printed above).
+# MAGIC    - Sync the tables to the `lakebase_to_lakehouse` schema in the catalog you set above (the `UC_CATALOG` / `UC_SCHEMA` values printed above).
 # MAGIC 7. Create the sync. The pipeline provisions in ~1 minute and immediately runs an initial snapshot.
 # MAGIC 8. Navigate to the schema to view the data.
 # MAGIC
@@ -218,7 +218,7 @@ owner_conn.close()
 # MAGIC
 # MAGIC Back in Lab 4 (Schema Migration) you added the `loyalty_points` column to `customers` and new
 # MAGIC tables on the Lakebase side. Because that migration already landed in production, the initial
-# MAGIC snapshot you just ran picked those columns up automatically. Lakehouse Sync also handles
+# MAGIC snapshot you just ran picked those columns up automatically. Lakebase CDF also handles
 # MAGIC ongoing schema evolution:
 # MAGIC
 # MAGIC - **New columns** appear in the Delta tables on the next sync cycle.
@@ -237,9 +237,9 @@ owner_conn.close()
 # COMMAND ----------
 
 # MAGIC %md-sandbox
-# MAGIC ## Federation vs. Lakehouse Sync — Decision Notes
+# MAGIC ## Federation vs. Lakebase CDF — Decision Notes
 # MAGIC
-# MAGIC | Use federation when… | Use Lakehouse Sync (this lab) when… |
+# MAGIC | Use federation when… | Use Lakebase CDF (this lab) when… |
 # MAGIC |---|---|
 # MAGIC | The query is ad-hoc or low-frequency | The query runs many times per minute on the same data |
 # MAGIC | The data must be live to the millisecond | Hourly or near-real-time freshness is acceptable |
@@ -248,14 +248,14 @@ owner_conn.close()
 # MAGIC | You want zero pipeline overhead | You can pay for a sync pipeline to amortize cost |
 # MAGIC
 # MAGIC In production, most data-centric teams use **both**: federation for live spot-checks /
-# MAGIC governed read APIs, and Lakehouse Sync for high-throughput analytical workloads.
+# MAGIC governed read APIs, and Lakebase CDF for high-throughput analytical workloads.
 
 # COMMAND ----------
 
 # MAGIC %md-sandbox
 # MAGIC ## Summary
 # MAGIC
-# MAGIC - You set up a Lakehouse Sync that mirrors three Lakebase tables to Delta in UC.
+# MAGIC - You set up a Lakebase CDF that mirrors three Lakebase tables to Delta in UC.
 # MAGIC - You verified an end-to-end write path: storefront-style insert in Lakebase → Delta replica.
 # MAGIC - You ran a customer-LTV aggregation against Delta — exactly the workload you don't want
 # MAGIC   running directly on the OLTP database.
@@ -268,7 +268,3 @@ owner_conn.close()
 # MAGIC brought the storefront online, safely evolved the OLTP schema across parallel branches,
 # MAGIC recovered from a production disaster with PITR, and wired up bidirectional data flows between
 # MAGIC Lakebase and the lakehouse. Head to the **Workshop Summary** for a full recap.
-
-# COMMAND ----------
-
-conn.close()

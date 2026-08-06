@@ -679,7 +679,9 @@ conn.close()
 # MAGIC - **Lab 4** — Star ratings, loyalty badges, and "Earn pts" labels appear after schema promotion
 # MAGIC - **Lab 5** — Orders page breaks during the PITR disaster, then recovers
 # MAGIC - **Lab 6** — Sale badges and discount prices appear via Reverse ETL
-# MAGIC - **Lab 7** — Lakehouse Sync goes live (no storefront change; analytics surface lights up)
+# MAGIC - **Lab 7** — Lakebase CDF goes live (no storefront change; analytics surface lights up)
 # MAGIC
 # MAGIC > The `ALTER DEFAULT PRIVILEGES` grants ensure the SP can access new tables
 # MAGIC > created in later labs without needing to re-run this notebook.
+# MAGIC
+# MAGIC **Next:** continue to **Lab 3 — Parallel Development with Branching**.
