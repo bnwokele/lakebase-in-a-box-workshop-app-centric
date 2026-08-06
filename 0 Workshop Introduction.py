@@ -78,13 +78,13 @@
 # MAGIC | **4 Schema to Prod** | Star ratings, loyalty badges, "Earn pts" labels appear |
 # MAGIC | **5 PITR Disaster** | Orders page breaks → gracefully degrades → recovers after PITR |
 # MAGIC | **6 Reverse ETL** | Sale badges, discount prices, "Spring Sale Deals" section appear |
-# MAGIC | **7 Lakehouse Sync** | Lakebase tables continuously mirror to Delta in Unity Catalog |
+# MAGIC | **7 Lakebase CDF** | Lakebase tables continuously mirror to Delta in Unity Catalog |
 # MAGIC
 # MAGIC > The storefront auto-detects schema changes every 30 seconds. No redeployment needed.
 # MAGIC
 # MAGIC ### This Workshop
 # MAGIC
-# MAGIC This workshop places you in the role of a database engineer at **DataCart**, a rapidly growing global e-commerce platform preparing for a major "Spring Sale" launch. You'll experience firsthand how Lakebase reverse ETL, Lakehouse Sync, branching, and PITR address real-world development and operational challenges.
+# MAGIC This workshop places you in the role of a database engineer at **DataCart**, a rapidly growing global e-commerce platform preparing for a major "Spring Sale" launch. You'll experience firsthand how Lakebase reverse ETL, Lakebase CDF, branching, and PITR address real-world development and operational challenges.
 # MAGIC
 # MAGIC ### Key Learning Objectives
 # MAGIC
@@ -95,5 +95,12 @@
 # MAGIC | **Branching** | Creating isolated environments for parallel schema evolution across multiple developer teams |
 # MAGIC | **Point-in-Time Recovery** | Recovering from catastrophic human error in seconds using PITR |
 # MAGIC | **Reverse ETL (UC → Lakebase)** | Serving lakehouse analytics data to applications via synced tables — no ETL pipelines |
-# MAGIC | **Lakehouse Sync (Lakebase → UC)** | Continuously mirroring OLTP tables to Delta for analytical workloads — no ETL pipelines |
+# MAGIC | **Lakebase CDF (Lakebase → UC)** | Continuously mirroring OLTP tables to Delta for analytical workloads — no ETL pipelines |
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## Ready? Set up your environment
+# MAGIC
+# MAGIC **Next:** open **`0.1 Lab - Create Lakebase Project & App (using SDK)`** to provision your Lakebase project and the DataCart Storefront app. Once that's set up, continue to **Lab 1 — Discover and Seed the Lakebase Project**.
 
