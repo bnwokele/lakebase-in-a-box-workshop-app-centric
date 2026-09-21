@@ -25,6 +25,7 @@
 # MAGIC | **5** | Point-in-Time Recovery (PITR) & Snapshots | Simulated a "Code Red" dropped-table disaster and recovered production with zero data loss |
 # MAGIC | **6** | Reverse ETL with Synced Tables (UC → Lakebase) | Pushed Spring Sale promotions from a Delta table into Lakebase so the storefront shows sale badges and discounts |
 # MAGIC | **7** | Lakebase CDF (Lakebase → UC) | Continuously mirrored live OLTP tables to Delta in Unity Catalog for heavy analytics — without loading production |
+# MAGIC | **8** | Read Replicas & Connection Pooling *(lecture)* | Scaled reads with read-only replica endpoints and scaled connections with the built-in PgBouncer pooler — both on shared storage, no data copy |
 # MAGIC
 # MAGIC > A companion setup notebook — **Create Lakebase Project & App (using SDK)** — provisions the Lakebase project and the DataCart storefront app if you need to (re)create them via the SDK instead of the bundle deploy path.
 

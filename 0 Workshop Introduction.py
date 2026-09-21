@@ -79,6 +79,7 @@
 # MAGIC | **5 PITR Disaster** | Orders page breaks → gracefully degrades → recovers after PITR |
 # MAGIC | **6 Reverse ETL** | Sale badges, discount prices, "Spring Sale Deals" section appear |
 # MAGIC | **7 Lakebase CDF** | Lakebase tables continuously mirror to Delta in Unity Catalog |
+# MAGIC | **8 Read Replicas & Pooling** | Lecture — scale reads with replica endpoints and connections with the built-in PgBouncer pooler (no storefront change) |
 # MAGIC
 # MAGIC > The storefront auto-detects schema changes every 30 seconds. No redeployment needed.
 # MAGIC
